@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="./js/jquery-1.10.2.js"></script>
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <div>username:<input type="text" id = "username"></div>
+    <div>password:<input type="password" id = "password"></div>
+    <div>tel:<input type="text" id = "tel"></div>
+    <div><button onclick="add()" >添加</button></div>
+</div>
+<hr>
+<div>
+    <div>id:<input type="text" id = "id"></div>
+    <div><button onclick="del()">删除</button></div>
+
+</div>
+<hr>
+
+<div>
+    <div>userid:<input type="text" id = "userid"></div>
+    <div>username:<input type="text" id = "name"></div>
+    <div>password:<input type="password" id = "pwd"></div>
+    <div>tel:<input type="text" id = "tell"></div>
+    <div><button onclick="update()" >修改</button></div>
+</div>
+
+
+<script>
+    function del(){
+        var id = $("#id").val();
+        console.log(id);
+        $.ajax({
+            type:"post",
+            url:"http://127.0.0.1:8080/deleteUser",
+            dataType:"json",
+            data:{
+                id:id
+            },
+            success: function (res) {
+                alert(res.msg);
+            }
+        });
+    }
+    function add(){
+        var name = $("#username").val();
+        var pwd = $("#password").val();
+        var tel = $("#tel").val();
+        console.log(username,pwd,tel);
+        $.ajax({
+            type:"post",
+            url:"http://127.0.0.1:8080/addUser",
+            dataType:"json",
+            data:{
+                username:name,
+                password:pwd,
+                tel:tel
+            },
+            success: function (res) {
+                alert(res.msg);
+            }
+        });
+    }
+    function update(){
+        var userid = $("#userid").val();
+        var name = $("#name").val();
+        var pwd = $("#pwd").val();
+        var tel = $("#tell").val();
+        console.log(name,pwd,tel);
+        $.ajax({
+            type:"post",
+            url:"http://127.0.0.1:8080/updateUser",
+            dataType:"json",
+            data:{
+                id:userid,
+                username:name,
+                password:pwd,
+                tel:tel
+            },
+            success: function (res) {
+                alert(res.msg);
+            }
+        });
+    }
+
+</script>
+</body>
+
+
+</html>

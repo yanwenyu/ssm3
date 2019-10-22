@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.duyi.hrb"/>
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:config/database.properties"/>
+    <!--第一套数据-->
+    <bean id="userDate" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <!--驱动类名 -->
+        <property name="driverClass" value="${db.user.driver}"/>
+        <!-- url -->
+        <property name="jdbcUrl" value="${db.user.jdbcUrl}"/>
+        <!-- 用户名 -->
+        <property name="user" value="${db.user.user}"/>
+        <!-- 密码 -->
+        <property name="password" value="${db.user.password}"/>
+        <!-- 当连接池中的连接耗尽的时候c3p0一次同时获取的连接数  -->
+        <property name="acquireIncrement" value="5"></property>
+        <!-- 初始连接池大小 -->
+        <property name="initialPoolSize" value="10"></property>
+        <!-- 连接池中连接最小个数 -->
+        <property name="minPoolSize" value="5"></property>
+        <!-- 连接池中连接最大个数 -->
+        <property name="maxPoolSize" value="20"></property>
+    </bean>
+    <!--第二套数据-->
+    <bean id="userMsg" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <!--驱动类名 -->
+        <property name="driverClass" value="${db.msg.driver}"/>
+        <!-- url -->
+        <property name="jdbcUrl" value="${db.msg.jdbcUrl}"/>
+        <!-- 用户名 -->
+        <property name="user" value="${db.msg.user}"/>
+        <!-- 密码 -->
+        <property name="password" value="${db.msg.password}"/>
+        <!-- 当连接池中的连接耗尽的时候c3p0一次同时获取的连接数  -->
+        <property name="acquireIncrement" value="5"></property>
+        <!-- 初始连接池大小 -->
+        <property name="initialPoolSize" value="10"></property>
+        <!-- 连接池中连接最小个数 -->
+        <property name="minPoolSize" value="5"></property>
+        <!-- 连接池中连接最大个数 -->
+        <property name="maxPoolSize" value="20"></property>
+    </bean>
+    <!--动态数据源的配置-->
+    <bean id="dynamicDataSource" class="com.duyi.common.DynamicDataSource">
+        <property name="targetDataSources">
+            <map key-type="java.lang.String">
+                <entry value-ref="userDate" key="userDate"/>
+                <entry value-ref="userMsg" key="userMsg"/>
+            </map>
+        </property>
+        <property name="defaultTargetDataSource" ref="userDate">
+        </property>
+    </bean>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dynamicDataSource"></property>
+        <!--        <property name="configLocation" value="classpath:/config/mybatis.xml"></property>-->
+        <property name="configuration">
+            <bean class="org.apache.ibatis.session.Configuration">
+                <property name="mapUnderscoreToCamelCase" value="true"/>
+            </bean>
+        </property>
+        <!-- sql映射文件路径 -->
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:com/duyi/hrb/dao/*.xml</value>
+            </list>
+        </property>
+
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--指定会话工厂，如果当前上下文中只定义了一个则该属性可省去 -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+        <!-- 指定要自动扫描接口的基础包，实现接口 -->
+        <property name="basePackage" value="com.duyi.hrb.dao"></property>
+    </bean>
+    <bean class="org.springframework.web.servlet.view.velocity.VelocityConfigurer" id="velocityConfigurer">
+        <property name="resourceLoaderPath">
+            <value>/templates</value>
+        </property>
+
+        <property name="velocityProperties">
+            <props>
+                <prop key="input.encoding">utf-8</prop>
+                <prop key="output.encoding">utf-8</prop>
+                <prop key="directive.foreach.counter.name">loopCounter</prop>
+                <prop key="directive.foreach.counter.initial.value">0</prop>
+                <!--<prop key="velocimacro.library.autoreload">true</prop>-->
+                <!--<prop key="velocimacro.library">macro.vm</prop>-->
+            </props>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.view.velocity.VelocityViewResolver" id="viewResolver">
+        <property name="suffix">
+            <value>.vm</value>
+        </property>
+        <property name="contentType"><value>text/html;charset=UTF-8</value></property>
+        <property name="prefix" value=""/>
+        <property name="cache" value="false"/>
+        <property name="toolboxConfigLocation" value="/WEB-INF/classes/config/tools.xml"></property>
+        <property name="exposeSpringMacroHelpers" value="true"/>
+        <property name="viewClass" value="com.duyi.common.VelocityToolbox20View" />
+        <property name="order" value="0"/>
+        <property name="dateToolAttribute"><value>dateTool</value></property>
+        <property name="numberToolAttribute"><value>numberTool</value></property>
+        <property name="requestContextAttribute" value="rc"></property>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.view.velocity.VelocityViewResolver" id="viewResolverSession">
+        <property name="suffix"> <value>.vm</value> </property>
+        <property name="contentType"> <value>text/html;charset=utf-8</value> </property>
+        <property name="exposeSessionAttributes"> <value>true</value> </property>
+    </bean>
+
+
+</beans>

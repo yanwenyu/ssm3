@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.duyi.hrb.dao.UserDao">
+    <select id="findByName" parameterType="String" resultType="com.duyi.hrb.domain.User">
+        select * from user where username = #{username}
+    </select>
+
+    <select id="findById" parameterType="Integer" resultType="com.duyi.hrb.domain.User">
+        select * from user where id = #{id}
+    </select>
+    <insert id="insertUser" parameterType="com.duyi.hrb.domain.User">
+
+        insert into user(username ,password,tel)
+        values(#{username}, #{password},#{tel});
+
+    </insert>
+    <delete id="del" parameterType="Integer">
+
+        delete from user where id = #{id} ;
+
+    </delete>
+
+    <update id="update" parameterType="com.duyi.hrb.domain.User"  >
+
+        update user set username = #{username}, password = #{password},tel = #{tel} where id = #{id};
+
+    </update>
+</mapper>
